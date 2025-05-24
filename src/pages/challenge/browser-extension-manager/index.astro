@@ -66,8 +66,6 @@ import Challenge from '@/layouts/Challenge.astro';
 
                 extensions.forEach(extension => {
                     
-                    console.log(extension);
-
                     const entry = entryTemplate.content.cloneNode(true);
 
                     entry.querySelector('.logo').src = extension.logo;
