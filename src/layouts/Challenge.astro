@@ -9,6 +9,19 @@ const { title } = Astro.props;
 		<title>{ title }</title>
 	</head>
 	<body>
-		<slot />
+		
+        <slot />
+
+        <details class="attribution">
+            <summary>Attribution</summary>
+            <p>Challenge by <a href="https://www.frontendmentor.io?ref=challenge">Frontend Mentor</a></p>
+            <p>Coded by <a href="#">Konstantin Dankov</a></p>
+        </details>
+
 	</body>
 </html>
+<style>
+    .attribution {
+        display: none;
+    }
+</style>

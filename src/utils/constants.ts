@@ -1,4 +1,4 @@
 export const site = {
-    title: 'Front-End Masters Challenges',
+    title: 'FrontEnd Mentor - Challenges',
     description: ''
 };
