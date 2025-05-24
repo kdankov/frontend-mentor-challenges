@@ -1,5 +1,18 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 
-// https://astro.build/config
-export default defineConfig({});
+import prettierResponse from '@altano/astro-prettier-response';
+
+export default defineConfig({
+  integrations: [prettierResponse({
+    disableMinifiers: true,
+    formatXml: true,
+  })],
+  vite: {
+    build: {
+      minify: false,
+      cssMinify: false,
+    },
+  },
+  compressHTML: false,
+});

@@ -1,22 +1,181 @@
+---
+import { site } from '@/utils/constants';
+
+import siteTitle from '@/utils/siteTitle';
+
+import Section from '@/components/Section.astro';
+
+const { title } = Astro.props;
+---
 <!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+		<title>{ siteTitle(site.title, title) }</title>
 	</head>
 	<body>
+		<Section classes="site-header">
+			<h1>{ site.title }</h1>
+		</Section>
 		<slot />
 	</body>
 </html>
+<style is:global>
 
-<style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
+	@layer reset, typography, layout, legend;
+
+	@layer reset {
+		
+		/* https://css-tricks.com/inheriting-box-sizing-probably-slightly-better-best-practice/ */
+		html {
+			box-sizing: border-box;
+		}
+
+		/* Box Sizing fix */
+		*, *:before, *:after {
+			box-sizing: inherit;
+		}
+
+		/* Whitespace reset */
+		* {
+			padding: 0;
+			margin: 0;
+		}
+
+		/* Image behaviour */
+		img {
+			display: block;
+			width: 100%;
+			height: auto;
+		}
+
+		/*
+		Remove list styles (bullets/numbers)
+		in case you use it with normalize.css
+		*/
+		ol, ul {
+			list-style: none;
+		}
+
+
+		/* Revert the 'white-space' property for textarea elements on Safari */
+		textarea {
+			white-space: revert;
+		}
+
+		/* https://12daysofweb.dev/2024/calc-size-and-interpolate-size/#enabling-it-site-wide-with-a-single-declaration */
+		:root {
+			interpolate-size: allow-keywords;
+		}
+
+		/*
+		Opt in for automatic view transitions
+		https://developer.mozilla.org/en-US/docs/Web/CSS/@view-transition 
+		*/
+		@view-transition {
+			navigation: auto;
+		}
+
+		/*
+		Change default text wrapping behaviour where possible
+		https://developer.mozilla.org/en-US/docs/Web/CSS/text-wrap
+		*/
+		html {
+			text-wrap: pretty;
+		}
 	}
+
+	@layer typography {
+		:root {
+			--fs-body: clamp(0.75rem, 0.6667rem + 0.4167vw, 1rem);
+			--fs-heading-6: clamp(0.8438rem, 0.725rem + 0.5938vw, 1.2rem);
+			--fs-heading-5: clamp(0.9492rem, 0.7856rem + 0.818vw, 1.44rem);
+			--fs-heading-4: clamp(1.0679rem, 0.8478rem + 1.1002vw, 1.728rem);
+			--fs-heading-3: clamp(1.2014rem, 0.9106rem + 1.4537vw, 2.0736rem);
+			--fs-heading-2: clamp(1.3515rem, 0.9726rem + 1.8947vw, 2.4883rem);
+			--fs-heading-1: clamp(1.5205rem, 1.032rem + 2.4425vw, 2.986rem);
+		}
+
+		html {
+			font-family: Lato, Helvetica, sans-serif;
+			line-height: 1.5;
+			font-size: var(--fs-body);
+			font-weight: 400;
+
+			font-variant: normal;
+			font-kerning: normal;
+			font-variant-ligatures: common-ligatures,contextual;
+			font-feature-settings: "kern","liga","clig","calt";
+
+			text-rendering: optimizeLegibility;
+			text-wrap: pretty;
+		}
+
+		body, table, form, input, select, button, textarea {
+			font: inherit;
+		}
+
+		h1, h2, h3, h4, h5, h6 {
+			line-height: 1.1;
+			font-weight: bold;
+			margin-top: 1em;
+			margin-bottom: 0.3em;
+		}
+
+		h1 { font-size: var(--fs-heading-1); }
+		h2 { font-size: var(--fs-heading-2); }
+		h3 { font-size: var(--fs-heading-3); }
+		h4 { font-size: var(--fs-heading-4); }
+		h5 { font-size: var(--fs-heading-5); }
+		h6 { font-size: var(--fs-heading-6); }
+
+		p:not(:only-child, :last-child) {
+			padding-bottom: 1.5em;
+		}
+
+		ul,
+		ol {
+			padding-left: 1.5em;
+
+			li {
+				padding-bottom: 0.3em;
+				list-style-position: outside;
+			}
+		}
+
+		ol li {
+			list-style-type: decimal;
+		}
+
+		figure {
+			margin: 0;
+		}
+
+		blockquote {
+
+			cite {
+				display: block;
+				padding-right: 1em;
+				text-align: right;
+			}
+		}
+
+	}
+
+	@layer layout {
+		body {
+			padding: 2em;
+		}
+
+		.section {
+			&.site-header {
+				h1 {
+					margin: 0;
+				}
+			}
+		}
+	}
+
 </style>
