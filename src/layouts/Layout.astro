@@ -16,10 +16,12 @@ const { title } = Astro.props;
 		<title>{ siteTitle(site.title, title) }</title>
 	</head>
 	<body>
-		<Section classes="site-header">
-			<h1>{ site.title }</h1>
-		</Section>
-		<slot />
+		<div class="site">
+			<Section classes="site-header">
+				<h1>{ site.title }</h1>
+			</Section>
+			<slot />
+		</div>
 	</body>
 </html>
 <style is:global>
@@ -145,6 +147,10 @@ const { title } = Astro.props;
 			}
 		}
 
+		ul li {
+			list-style-type: disc;
+		}
+
 		ol li {
 			list-style-type: decimal;
 		}
@@ -165,7 +171,11 @@ const { title } = Astro.props;
 	}
 
 	@layer layout {
+
 		body {
+			display: grid;
+			min-height: 100vh;
+			place-items: center;
 			padding: 2em;
 		}
 
