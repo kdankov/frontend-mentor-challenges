@@ -1,0 +1,502 @@
+---
+import Challenge from '@/layouts/Challenge.astro';
+---
+<Challenge>
+    
+    <section class="page">
+
+        <header class="page-header">
+            <h2>Extensions</h2>
+
+            <button class="theme-toggle" id="theme-toggle" title="Toggles light & dark" aria-label="auto" aria-live="polite">
+                <svg class="sun-and-moon" aria-hidden="true" width="24" height="24" viewBox="0 0 24 24">
+                    <mask class="moon" id="moon-mask">
+                        <rect x="0" y="0" width="100%" height="100%" fill="white" />
+                        <circle cx="24" cy="10" r="6" fill="black" />
+                    </mask>
+                    <circle class="sun" cx="12" cy="12" r="6" mask="url(#moon-mask)" fill="currentColor" />
+                    <g class="sun-beams" stroke="currentColor">
+                        <line x1="12" y1="1" x2="12" y2="3" />
+                        <line x1="12" y1="21" x2="12" y2="23" />
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                        <line x1="1" y1="12" x2="3" y2="12" />
+                        <line x1="21" y1="12" x2="23" y2="12" />
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                    </g>
+                </svg>
+            </button>
+        </header>
+        
+        <section class="listing extensions">
+            
+            <header>
+                <h1>Extensions List</h1>
+
+                <section class="filter">
+                    <input type="radio" name="extensions-list-filter" value="all" id="extensions-list-filter-all" checked>
+                    <label class="button" for="extensions-list-filter-all">All</label>
+                    <input type="radio" name="extensions-list-filter" value="active" id="extensions-list-filter-active">
+                    <label class="button" for="extensions-list-filter-active">Active</label>
+                    <input type="radio" name="extensions-list-filter" value="inactive" id="extensions-list-filter-inactive">
+                    <label class="button" for="extensions-list-filter-inactive">Inactive</label>
+                </section>
+            </header>
+                
+            <section class="list"></section>
+
+        </section>
+
+    </section>
+
+    <template id="extension-entry">
+        <article class="extension">
+            <section class="media">
+                <img src="" alt="" class="logo">
+            </section>
+            <section class="content">
+                <h6 class="title"></h6>
+                <p class="description"></p>
+            </section>
+            <section class="actions">
+                <button class="button danger" data-action="remove">Remove</button>
+                <input type="checkbox" name="is-active" class="state">
+            </section>
+        </article>
+    </template>
+
+    <script is:inline>
+
+        async function loadExtensions() {
+            try {
+                const response = await fetch('/challenge/browser-extension-manager/assets/data/extensions.json');
+                const extensions = await response.json();
+
+                const list = document.querySelector(".listing.extensions .list");
+                const entryTemplate = document.querySelector("#extension-entry");
+                
+                function actionRemove(e) {
+                    e.target.closest('.extension').remove();
+                }
+
+                extensions.forEach(extension => {
+                    
+                    const entry = entryTemplate.content.cloneNode(true);
+
+                    entry.querySelector('.logo').src = extension.logo;
+                    entry.querySelector('.title').textContent = extension.name;
+                    entry.querySelector('.description').textContent = extension.description;
+                    entry.querySelector('.state').checked = extension.isActive;
+                    entry.querySelector('.button[data-action="remove"]').addEventListener('click', actionRemove);
+
+                    list.append(entry);
+
+                });
+            } catch (error) {
+                console.error('Error loading extensions:', error);
+            }
+        }
+
+        if ("content" in document.createElement("template")) {
+            loadExtensions();
+        }
+    </script>
+
+    <script is:inline>
+
+        const storageKey = 'theme-preference'
+
+        const onClick = () => {
+            theme.value = theme.value === 'light' ? 'dark' : 'light';
+            setPreference();
+        }
+
+        const getColorPreference = () => {
+            if (localStorage.getItem(storageKey)) {
+                return localStorage.getItem(storageKey)
+            } else {
+                return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            }
+        }
+
+        const setPreference = () => {
+            localStorage.setItem(storageKey, theme.value);
+            reflectPreference();
+        }
+
+        const reflectPreference = () => {
+            document.firstElementChild.setAttribute('data-theme', theme.value);
+            document.querySelector('#theme-toggle')?.setAttribute('aria-label', theme.value);
+        }
+
+        const theme = {
+            value: getColorPreference(),
+        }
+
+        // set early so no page flashes / CSS is made aware
+        reflectPreference();
+
+        window.onload = () => {
+            // set on load so screen readers can see latest value on the button
+            reflectPreference()
+
+            // now this script can find and listen for clicks on the control
+            document.querySelector('#theme-toggle').addEventListener('click', onClick);
+        }
+
+        // sync with system changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', ({matches:isDark}) => {
+            theme.value = isDark ? 'dark' : 'light';
+            setPreference();
+        })
+
+    </script>
+
+</Challenge>
+<style is:global>
+
+    @layer variables, reset, typography, layout, components, theme-toggle;
+
+    @layer variables {
+        [data-theme="light"] {
+            --clr-gradient: linear-gradient(180deg, #EBF2FC 0%, #EEF8F9 100%);
+
+            --clr-bgrd: #FFF;
+            --clr-text: #000;
+
+            --clr-border: #CCC;
+
+            --icon-fill: hsl(210 10% 30%);
+            --icon-fill-hover: hsl(210 10% 15%);
+
+        }
+
+        [data-theme="dark"] {
+            
+            --clr-gradient: linear-gradient(180deg, #040918 0%, #091540 100%);
+
+            --clr-bgrd: #000;
+            --clr-text: #fff;
+
+            --clr-border: #444;
+
+            --clr-icon-fill: hsl(210 10% 70%);
+            --clr-icon-fill-hover: hsl(210 15% 90%);
+
+            --clr-accent: hsl(from rgb(240, 80, 80) h 60% l / 100%);
+
+        }
+    }
+
+    @layer reset {
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        *, *::before, *::after {
+            box-sizing: inherit;
+        }
+
+        html {
+            box-sizing: inherit;
+        }
+    }
+
+    @layer typography {
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
+        :root {
+            --fs-body: clamp(0.75rem, 0.6667rem + 0.4167vw, 1rem);
+            --fs-heading-6: clamp(0.8438rem, 0.725rem + 0.5938vw, 1.2rem);
+            --fs-heading-5: clamp(0.9492rem, 0.7856rem + 0.818vw, 1.44rem);
+            --fs-heading-4: clamp(1.0679rem, 0.8478rem + 1.1002vw, 1.728rem);
+            --fs-heading-3: clamp(1.2014rem, 0.9106rem + 1.4537vw, 2.0736rem);
+            --fs-heading-2: clamp(1.3515rem, 0.9726rem + 1.8947vw, 2.4883rem);
+            --fs-heading-1: clamp(1.5205rem, 1.032rem + 2.4425vw, 2.986rem);
+        }
+
+        html {
+            font-family: 'Noto Sans', sans-serif;
+            font-size: var(--fs-body);
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            line-height: 1.1;
+            margin-bottom: 0.3em;
+
+            &:where(:not(:first-child)) {
+                margin-top: 1em;
+            }
+        }
+
+        h1 { font-size: var(--fs-heading-1); }
+        h2 { font-size: var(--fs-heading-2); }
+        h3 { font-size: var(--fs-heading-3); }
+        h4 { font-size: var(--fs-heading-4); }
+        h5 { font-size: var(--fs-heading-5); }
+        h6 { font-size: var(--fs-heading-6); }
+
+        p, ul, ol {
+            margin-bottom: 1.5em;
+        }
+    }
+
+    @layer layout {
+
+        body {
+            background: var(--clr-gradient);
+            color: var(--clr-text);
+        }
+
+        .page {
+            padding: 2em;
+            max-width: 140ch;
+            margin: 0 auto;
+        }
+    }
+
+    @layer components {
+
+        .listing {
+
+            header {
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 2em;
+            }
+
+            .filter {
+                display: flex;
+                gap: 1em;
+
+                label {
+
+                }
+
+                input {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    visibility: hidden;
+                }
+            }
+
+            input:checked + label {
+                background-color: var(--clr-accent);
+            }
+
+            &:has(#extensions-list-filter-all:checked) {
+
+            }
+
+            &:has(#extensions-list-filter-active:checked) {
+                .extension:has(.state:not(:checked)) {
+                    display: none;
+                }
+            }
+
+            &:has(#extensions-list-filter-inactive:checked) {
+                .extension:has(.state:checked) {
+                    display: none;
+                }
+            }
+        }
+
+        .list {
+            --size-column-min: 36ch;
+
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(var(--size-column-min), 1fr));
+            gap: 1em;
+        }
+
+        .extension {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 1.5em;
+            gap: 1rem;
+            border-radius: 1.2em;
+            background: hsl(from var(--clr-bgrd) h s 15% / 70%);
+            border: 1px solid var(--clr-border);
+            
+            & > * {
+                flex: 0 1 auto;
+            }
+
+            .media {
+
+            }
+
+            .content {
+                flex: 1 1 50%;
+
+                p {
+                    opacity: 0.7;
+                }
+            }
+
+            .actions {
+                flex-basis: 100%;
+                margin-top: auto;
+                padding-top: 1em;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+
+        .button {
+            display: block;
+            border: 1px solid var(--clr-border);
+            padding: 0.5em 1em;
+            border-radius: 2em;
+            cursor: pointer;
+            background: none;
+            color: var(--clr-text);
+
+            &:hover {
+                background: #C00;
+                color: #fff;
+            }
+        }
+
+        input[type="checkbox"] {
+            --clr-bgrd-checkbox: hsl(from var(--clr-bgrd) h s 30% / 100%);
+
+            appearance: none;
+            display: flex;
+            align-items: center;
+            width: 3.2em;
+            height: 1.5em;
+            border-radius: 2em;
+            padding: 0.2em;
+            position: relative;
+            background: var(--clr-bgrd-checkbox);
+
+            &::before {
+                --size-width: 1.3em;
+                display: block;
+                content: '';
+                width: var(--size-width);
+                height: var(--size-width);
+                background: var(--clr-text);
+                border-radius: 50%;
+                position: absolute;
+                left: 0.3em;
+                transition: left 0.2s ease-in-out;
+            }
+
+            &:checked {
+                --clr-bgrd-checkbox: var(--clr-accent);
+
+                &::before {
+                    left: calc( 100% - var(--size-width) - 0.2em );
+                }
+            }
+        }
+    }
+
+    @layer theme-toggle {
+        
+        @import "https://unpkg.com/open-props/easings.min.css";
+        
+        .theme-toggle {
+            --size: 2rem;
+
+            line-height: 1;
+            display: block;
+            background: none;
+            border: none;
+            padding: 0;
+            inline-size: var(--size);
+            block-size: var(--size);
+            aspect-ratio: 1;
+            border-radius: 50%;
+            cursor: pointer;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            outline-offset: 5px;
+        }
+
+        .sun-and-moon > :is(.moon, .sun, .sun-beams) {
+            transform-origin: center;
+        }
+        
+        .sun-and-moon > :is(.moon, .sun) {
+            fill: var(--icon-fill);
+        }
+        
+        .theme-toggle:is(:hover, :focus-visible) > .sun-and-moon > :is(.moon, .sun) {
+            fill: var(--icon-fill-hover);
+        }
+        
+        .sun-and-moon > .sun-beams {
+            stroke: var(--icon-fill);
+            stroke-width: 2px;
+        }
+        
+        .theme-toggle:is(:hover, :focus-visible) .sun-and-moon > .sun-beams {
+            stroke: var(--icon-fill-hover);
+        }
+        
+        [data-theme="dark"] .sun-and-moon > .sun {
+            transform: scale(1.75);
+        }
+        
+        [data-theme="dark"] .sun-and-moon > .sun-beams {
+            opacity: 0;
+        }
+        
+        [data-theme="dark"] .sun-and-moon > .moon > circle {
+            transform: translateX(-7px);
+        }
+        
+        @supports (cx: 1) {
+            [data-theme="dark"] .sun-and-moon > .moon > circle {
+                cx: 17;
+                transform: translateX(0);
+            }
+        }
+        
+        @media (prefers-reduced-motion: no-preference) {
+            .sun-and-moon > .sun {
+                transition: transform .5s var(--ease-elastic-3);
+            }
+            
+            .sun-and-moon > .sun-beams {
+                transition: transform .5s var(--ease-elastic-4), opacity .5s var(--ease-3);
+            }
+            
+            .sun-and-moon .moon > circle {
+                transition: transform .25s var(--ease-out-5);
+            }
+            
+            @supports (cx: 1) {
+                .sun-and-moon .moon > circle {
+                    transition: cx .25s var(--ease-out-5);
+                }
+            }
+            
+            [data-theme="dark"] .sun-and-moon > .sun {
+                transition-timing-function: var(--ease-3);
+                transition-duration: .25s;
+                transform: scale(1.75);
+            }
+            
+            [data-theme="dark"] .sun-and-moon > .sun-beams {
+                transition-duration: .15s;
+                transform: rotateZ(-25deg);
+            }
+            
+            [data-theme="dark"] .sun-and-moon > .moon > circle {
+                transition-duration: .5s;
+                transition-delay: .25s;
+            }
+        }
+    }
+
+</style>
